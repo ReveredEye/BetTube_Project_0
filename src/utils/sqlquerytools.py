@@ -7,9 +7,12 @@
 # setting the path
 import sys
 
-sys.path.append(r'..\..\configure')
+#Just hashing this, as SQLconfig is in source code path.
+#sys.path.append(r'..\..\configure')
 
-import conf
+#Changed to SQLconfig from conf
+import SQLconfig
+
 import pyodbc
 import pandas as pd
 
@@ -43,19 +46,23 @@ class SqlQueryResult(object):
         result(*args) : When argument is empty, returns the last query results in Pandas Dataframe.
                         When argument is SQL query code, returns current query results in Pandas Dataframe.
     '''
-    def __init__(self):
+    def __init__(self, database = SQLconfig.configs['database'], option = "engine"):
         self.connect_flag = 0
         self.connect = 'Initialization'
-        self.connect_to_server()
+        self.details = ('DRIVER=%s;SERVER=%s;DATABASE=%s;UID=%sPWD=%s;' 
+                            % (SQLconf.configs['driver'], SQLconfig.configs['']))
+        if option == "engine":
+        else:
+            self.connect_to_server(database)
         self.query_result = 'Initialization'
         pd.set_option('display.max_columns', None)
         pd.set_option('display.max_rows', None)
 
-    def connect_to_server(self):
+    def connect_to_server(self, db):
         # check the connection flag.
         if self.connect_flag == 0:
             print('*** Connecting to SQL Server... ***')
-            self.connect = pyodbc.connect(str(conf.configs['db']))
+            self.connect = pyodbc.connect(str(SQLconfig.configs['db']))
             self.connect_flag = 1
             print('*** Connection Established. ***')
         else:
