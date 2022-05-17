@@ -43,12 +43,16 @@ class SqlQueryResult(object):
         result(*args) : When argument is empty, returns the last query results in Pandas Dataframe.
                         When argument is SQL query code, returns current query results in Pandas Dataframe.
     '''
-    def __init__(self, database = SQLconfig.configs['database'], option = "engine"):
+    def __init__(self, dbType = 'PROD', database = None, option = "engine"):
         self.connect_flag = 0
         self.connect = 'Initialization'
+        if dbType == 'PROD':
+            config = SQLconfig.PRODconfigs(database)
+        else:
+            config = SQLconfig.UATconfigs(database)
         self.details = ("DRIVER=%s;SERVER=%s;DATABASE=%s;UID=%s;PWD=%s"
-                    % (SQLconfig.configs['driver'], SQLconfig.configs['server'],database,
-                        SQLconfig.configs['uid'], SQLconfig.configs['pwd']))
+                    % (config.get_driver(), config.get_server(), config.get_database(),
+                        config.get_uid(), config.get_pwd()))
         if option == "engine":
             self.connect_sqlalchemy()
         else:
@@ -80,9 +84,12 @@ class SqlQueryResult(object):
             print('*** Connection Has Already Been Established. ***')
 
     def disconnect(self):
-        self.connect.close()
-        self.connect_flag = 0
-        print('*** Connection Closed. ***')
+        if self.connect_flag == 1:
+          self.connection.close()
+          self.connect_flag = 0
+          print('*** Connection Closed. ***')
+        else:
+          print('*** Connection is already closed. ***')
 
     def query(self, sql_code):
         ''' query database
